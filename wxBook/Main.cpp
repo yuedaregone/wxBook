@@ -1,4 +1,5 @@
 #include "Main.h"
+#include "Config.h"
 
 IMPLEMENT_APP(MainApp)
 
@@ -27,9 +28,12 @@ MainFrame::MainFrame(wxFrame* parent)
 	//m_text->AppendText("12335346543");
 	//this->AddChild(m_textCtrl);
 	
-	
+	wxSize size = m_text->GetSize();
 	
 	Show();
+
+	int w, h;
+	Config::Get().GetWH(w, h);
 }
 
 void MainFrame::OnLeftMouseDown(wxMouseEvent& evt)

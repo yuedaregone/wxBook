@@ -7,6 +7,10 @@
 
 Config::Config()
 {
+}
+
+void Config::Init()
+{
 	ReadConfig();
 }
 
@@ -24,23 +28,22 @@ void Config::DefaultConfigData()
 {
 	m_config.width = 500;
 	m_config.height = 500;
+	m_config.fontSize = 10;
+	m_config.spacing = 5;
 }
 
-std::map<std::string, std::string*>* Config::LoadAllText()
+void Config::LoadAllText(std::map<std::string, std::string> &mapData)
 {
 	std::string path = GetCurPath();
 
-	std::ifstream fs(path + "\\config", std::ios::in);	
+	std::ifstream fs(path + "\\config", std::ios::in);
 
 	if (!fs)
 	{
-		return NULL;
+		return;
 	}
 
-	std::map<std::string, std::string*>* mapData = new std::map<std::string, std::string*>();
-
 	std::string line = "";
-
 	char buff[MAX_BUFF] = {'\0'};
 	while (fs.getline(buff, MAX_BUFF))
 	{
@@ -49,40 +52,49 @@ std::map<std::string, std::string*>* Config::LoadAllText()
 		{
 			continue;
 		}
-		
+
 		size_t offset = line.find('=');
 		std::string head = line.substr(0, offset);
-		std::string* trail = new std::string(line.substr(offset + 1, line.length() - offset - 1));
-		mapData->insert(std::make_pair(head, trail));
+		std::string trail = line.substr(offset + 1, line.length() - offset - 1);
+		mapData.insert(std::make_pair(head, trail));
 
 		memset(buff, 0, MAX_BUFF);
 		line.clear();
-	}	
-	return mapData;
+	}
+}
+
+static bool TryGetValue(std::map<std::string, std::string> &data, std::string &key, int &val)
+{
+	std::map<std::string, std::string>::iterator it = data.find(key);
+	if (it != data.end())
+	{
+		val = atoi(it->second->c_str());
+		return true;
+	}
+	return false;
 }
 
 void Config::ReadConfig()
 {
 	DefaultConfigData();
 
-	std::map<std::string, std::string*>* data = LoadAllText();
-	if (data == NULL)
-	{		
+	std::map<std::string, std::string> data;
+	LoadAllText(data);
+	if (data.empty())
+	{
 		return;
 	}
-	
+
 	std::string key = "width";
-	std::map<std::string, std::string*>::iterator it = data->find(key);
-	if (it != data->end())
+	int val = 0;
+	if (TryGetValue(data, key, val))
 	{
-		m_config.width = atoi(it->second->c_str());
+		m_config.width = val;
 	}
-	
-	key = "height";
-	it = data->find(key);
-	if (it != data->end())
+
+	if (TryGetValue(data, key, val))
 	{
-		m_config.height = atoi(it->second->c_str());
+		m_config.height = val;
 	}
 }
 

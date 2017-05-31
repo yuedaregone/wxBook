@@ -10,14 +10,17 @@ class Config : public Singleton<Config>
 	{
 		int width;
 		int height;
+		int fontSize;
+		int spacing;
 	}ConfigStruct;
 public:
 	Config();
+	void Init();
 	void GetWH(int & w, int & h);
 private:
 	void DefaultConfigData();
 	std::map<std::string, std::string*>* LoadAllText();
-	void ReadConfig();	
-private:	
+	void ReadConfig();
+private:
 	ConfigStruct m_config;
 };

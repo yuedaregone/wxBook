@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #define MAX_BUFF 256
 
+#define BEGIN_READ std::string key; int val = 0;
+#define TRY_GET_VALUE(PARAM, KEY) key = #KEY; \
+			if (TryGetValue(data, key, val)) \
+			{ \
+				PARAM.KEY = val; \
+			}
+#define END_READ
+
+
 Config::Config()
 {
 }
@@ -68,7 +77,7 @@ static bool TryGetValue(std::map<std::string, std::string> &data, std::string &k
 	std::map<std::string, std::string>::iterator it = data.find(key);
 	if (it != data.end())
 	{
-		val = atoi(it->second->c_str());
+		val = atoi(it->second.c_str());
 		return true;
 	}
 	return false;
@@ -85,6 +94,13 @@ void Config::ReadConfig()
 		return;
 	}
 
+BEGIN_READ
+	TRY_GET_VALUE(m_config, width)
+	TRY_GET_VALUE(m_config, height)
+	TRY_GET_VALUE(m_config, fontSize)
+	TRY_GET_VALUE(m_config, spacing)
+END_READ
+/*
 	std::string key = "width";
 	int val = 0;
 	if (TryGetValue(data, key, val))
@@ -92,10 +108,12 @@ void Config::ReadConfig()
 		m_config.width = val;
 	}
 
+	key = "height";
 	if (TryGetValue(data, key, val))
 	{
 		m_config.height = val;
 	}
+*/
 }
 
 void Config::GetWH(int & w, int & h)

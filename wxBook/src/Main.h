@@ -9,7 +9,7 @@
 class MainApp : public wxApp
 {
 public:
-	virtual bool OnInit();	
+	virtual bool OnInit();
 };
 
 class MainFrame : public wxFrame
@@ -19,7 +19,9 @@ public:
 	void OnMouseMove(wxMouseEvent& evt);
 	void OnLeftMouseDown(wxMouseEvent& evt);
 private:
-	wxPoint m_delta;	
+	int GetLines();
+private:
+	wxPoint m_delta;
 	wxStaticText* m_text;
 	wxDECLARE_EVENT_TABLE();
 };

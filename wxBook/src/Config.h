@@ -17,9 +17,11 @@ public:
 	Config();
 	void Init();
 	void GetWH(int & w, int & h);
+	int GetFontSize() { return m_config.fontSize; }
+	int GetFontSpacing() { return m_config.spacing; }
 private:
 	void DefaultConfigData();
-	std::map<std::string, std::string*>* LoadAllText();
+	void LoadAllText(std::map<std::string, std::string> &mapData);
 	void ReadConfig();
 private:
 	ConfigStruct m_config;

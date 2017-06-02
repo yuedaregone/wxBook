@@ -56,3 +56,11 @@ void MainFrame::OnMouseMove(wxMouseEvent& evt)
 		Move(wxPoint(pos.x - m_delta.x, pos.y - m_delta.y));
 	}
 }
+
+int MainFrame::GetLines()
+{
+	int fontSize = Config::Get().GetFontSize();
+	int spacing = Config::Get().GetFontSpacing();
+	wxSize size = this->GetSize();
+	return size.height / (fontSize + spacing);
+}

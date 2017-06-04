@@ -12,11 +12,13 @@ public:
 	void OnMouseMove(wxMouseEvent& evt);
 	void OnLeftMouseDown(wxMouseEvent& evt);
 private:
-	int GetLines();
+	void InitBookStr();
 	void InitFrame();
+	int GetLines();
 private:
 	wxPoint m_delta;	
 	std::vector<wxStaticText*> m_texts;
+	wxString* m_bookStr;
 	wxDECLARE_EVENT_TABLE();
 };
 

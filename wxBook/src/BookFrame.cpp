@@ -35,6 +35,10 @@ void BookFrame::OnMouseMove(wxMouseEvent& evt)
 	}
 }
 
+void BookFrame::InitBookStr()
+{
+}
+
 void BookFrame::InitFrame()
 {
 	int w, h;
@@ -43,10 +47,14 @@ void BookFrame::InitFrame()
 	SetBackgroundColour(wxColor(Config::Get().GetBackColor()));
 	SetForegroundColour(wxColor(Config::Get().GetFrontColor()));
 
+	int startX, startY;
+	startX = startY = Config::Get().GetEdge();
+	int lineHeight = Config::Get().GetFontSize() + Config::Get().GetFontSpacing();
+
 	int lines = GetLines();
 	for (int i = 0; i < lines; ++i)
 	{
-		wxStaticText* text = new wxStaticText(this, wxID_ANY, "", wxPoint(10, 10));
+		wxStaticText* text = new wxStaticText(this, wxID_ANY, "", wxPoint(startX, startY - lineHeight * i));
 		m_texts.push_back(text);
 	}	
 }

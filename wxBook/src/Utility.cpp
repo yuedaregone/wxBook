@@ -1,6 +1,9 @@
 #include "Utility.h"
 #include <stdio.h>
 #include <string.h>
+#include <iostream>
+#include <windows.h>
+#define MAX_BUFF 256
 
 unsigned long Utility::str2hex(const char * str)
 {
@@ -29,4 +32,14 @@ unsigned long Utility::str2hex(const char * str)
 	}
 
 	return ret;
+}
+
+std::string Utility::GetCurPath()
+{
+	char buff[MAX_BUFF] = { '\0' };
+	GetModuleFileName(NULL, buff, sizeof(buff));
+	std::string str = buff;
+	size_t last = str.find_last_of('\\');
+
+	return str.substr(0, last);
 }

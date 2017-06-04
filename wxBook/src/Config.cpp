@@ -30,27 +30,20 @@ void Config::Init()
 	ReadConfig();
 }
 
-static std::string GetCurPath()
-{
-	char buff[MAX_BUFF] = {'\0'};
-	GetModuleFileName(NULL, buff, sizeof(buff));
-	std::string str = buff;
-	size_t last = str.find_last_of('\\');
-
-	return str.substr(0, last);
-}
-
 void Config::DefaultConfigData()
 {
 	m_config.width = 500;
 	m_config.height = 500;
 	m_config.fontSize = 10;
 	m_config.spacing = 5;
+	m_config.edge = 20;
+	m_config.backColor = 0x000000;
+	m_config.frontColor = 0xFFFFFF;
 }
 
 void Config::LoadAllText(std::map<std::string, std::string> &mapData)
 {
-	std::string path = GetCurPath();
+	std::string path = Utility::GetCurPath();
 
 	std::ifstream fs(path + "\\config", std::ios::in);
 

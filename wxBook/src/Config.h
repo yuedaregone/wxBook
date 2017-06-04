@@ -12,6 +12,8 @@ class Config : public Singleton<Config>
 		int height;
 		int fontSize;
 		int spacing;
+		unsigned long backColor;
+		unsigned long frontColor;
 	}ConfigStruct;
 public:
 	Config();
@@ -19,6 +21,8 @@ public:
 	void GetWH(int & w, int & h);
 	int GetFontSize() { return m_config.fontSize; }
 	int GetFontSpacing() { return m_config.spacing; }
+	unsigned long GetBackColor() { return m_config.backColor; }
+	unsigned long GetFrontColor() { return m_config.frontColor; }
 private:
 	void DefaultConfigData();
 	void LoadAllText(std::map<std::string, std::string> &mapData);

@@ -3,8 +3,12 @@ cmake_minimum_required(VERSION 3.5)
 project(wxBook)
 
 #head file path
-SET(INC $(WXWIN))
-INCLUDE_DIRECTORIES( src $(INC) )
+#SET(INC ${WXWIN})
+find_library(WXWidget
+NAMES wxWidget
+PATHS ${WXWIN}
+)
+INCLUDE_DIRECTORIES(${WXWidget_INCLUDE_DIR})
 
 #source directory
 AUX_SOURCE_DIRECTORY(src DIR_SRCS)

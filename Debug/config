@@ -1,3 +1,5 @@
-width=188
-height=999
-aaaa=3
+width=600
+height=500
+//ARGB
+backColor=FFFFFF97
+frontColor=FF9AFF9A

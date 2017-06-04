@@ -18,6 +18,19 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\BookFrame.cpp" />
+    <ClCompile Include="src\Config.cpp" />
+    <ClCompile Include="src\Main.cpp" />
+    <ClCompile Include="src\Utility.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="src\BookFrame.h" />
+    <ClInclude Include="src\Config.h" />
+    <ClInclude Include="src\Main.h" />
+    <ClInclude Include="src\Singleton.h" />
+    <ClInclude Include="src\Utility.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
     <ProjectGuid>{9523B008-1C3E-4A0A-BC37-1CE78878B47B}</ProjectGuid>
@@ -120,15 +133,6 @@
       <OptimizeReferences>true</OptimizeReferences>
     </Link>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="Config.cpp" />
-    <ClCompile Include="Main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="Main.h" />
-    <ClInclude Include="Singleton.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

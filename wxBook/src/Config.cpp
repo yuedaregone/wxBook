@@ -3,13 +3,20 @@
 #include <windows.h>
 #include <map>
 #include <stdlib.h>
+#include <sstream>
+#include "Utility.h"
 #define MAX_BUFF 256
 
-#define BEGIN_READ std::string key; int val = 0;
-#define TRY_GET_VALUE(PARAM, KEY) key = #KEY; \
+#define BEGIN_READ std::string key; std::string val;
+#define TRY_GET_INT_VALUE(PARAM, KEY) key = #KEY; \
 			if (TryGetValue(data, key, val)) \
 			{ \
-				PARAM.KEY = val; \
+				PARAM.KEY = atoi(val.c_str()); \
+			}
+#define TRY_GET_ULONG_VALUE(PARAM, KEY) key = #KEY; \
+			if (TryGetValue(data, key, val)) \
+			{ \
+				PARAM.KEY = Utility::str2hex(val.c_str()); \
 			}
 #define END_READ
 
@@ -72,16 +79,18 @@ void Config::LoadAllText(std::map<std::string, std::string> &mapData)
 	}
 }
 
-static bool TryGetValue(std::map<std::string, std::string> &data, std::string &key, int &val)
+static bool TryGetValue(std::map<std::string, std::string> &data, std::string &key, std::string &val)
 {
 	std::map<std::string, std::string>::iterator it = data.find(key);
 	if (it != data.end())
 	{
-		val = atoi(it->second.c_str());
+		val = it->second.c_str();
 		return true;
 	}
 	return false;
 }
+
+
 
 void Config::ReadConfig()
 {
@@ -95,25 +104,14 @@ void Config::ReadConfig()
 	}
 
 BEGIN_READ
-	TRY_GET_VALUE(m_config, width)
-	TRY_GET_VALUE(m_config, height)
-	TRY_GET_VALUE(m_config, fontSize)
-	TRY_GET_VALUE(m_config, spacing)
+	TRY_GET_INT_VALUE(m_config, width)
+	TRY_GET_INT_VALUE(m_config, height)
+	TRY_GET_INT_VALUE(m_config, fontSize)
+	TRY_GET_INT_VALUE(m_config, spacing)
+	TRY_GET_ULONG_VALUE(m_config, backColor)
+	TRY_GET_ULONG_VALUE(m_config, frontColor)
 END_READ
-/*
-	std::string key = "width";
-	int val = 0;
-	if (TryGetValue(data, key, val))
-	{
-		m_config.width = val;
-	}
 
-	key = "height";
-	if (TryGetValue(data, key, val))
-	{
-		m_config.height = val;
-	}
-*/
 }
 
 void Config::GetWH(int & w, int & h)

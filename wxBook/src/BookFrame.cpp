@@ -1,9 +1,13 @@
 #include "BookFrame.h"
 #include "Config.h"
+#include <stdlib.h>
+#include <fstream>
+#include "Utility.h"
 
 wxBEGIN_EVENT_TABLE(BookFrame, wxFrame)
 	EVT_MOTION(BookFrame::OnMouseMove)
 	EVT_LEFT_DOWN(BookFrame::OnLeftMouseDown)
+	EVT_RIGHT_DOWN(BookFrame::OnRightMouseDown)
 wxEND_EVENT_TABLE()
 
 BookFrame::BookFrame(wxFrame* parent)
@@ -23,6 +27,13 @@ void BookFrame::OnLeftMouseDown(wxMouseEvent& evt)
 	int dx = pos.x - origin.x;
 	int dy = pos.y - origin.y;
 	m_delta = wxPoint(dx, dy);
+
+	NextPage();
+}
+
+void BookFrame::OnRightMouseDown(wxMouseEvent& evt)
+{
+	PrePage();
 }
 
 void BookFrame::OnMouseMove(wxMouseEvent& evt)
@@ -51,20 +62,212 @@ void BookFrame::InitFrame()
 	startX = startY = Config::Get().GetEdge();
 	int lineHeight = Config::Get().GetFontSize() + Config::Get().GetFontSpacing();
 
+	m_calcText = new wxStaticText(this, wxID_ANY, "", wxPoint(0, 0));
+
 	int lines = GetLines();
 	for (int i = 0; i < lines; ++i)
 	{
-		wxStaticText* text = new wxStaticText(this, wxID_ANY, "", wxPoint(startX, startY - lineHeight * i));
+		char buff[16] = { 0 };
+		wxStaticText* text = new wxStaticText(this, wxID_ANY, _itoa(i, buff, 10), wxPoint(startX, startY + lineHeight * i));
 		m_texts.push_back(text);
 	}	
+
+	std::string path = Utility::GetCurPath() + "\\test.txt";
+	FILE* file = fopen(path.c_str(), "rb+");
+	if (file == NULL)
+	{
+		printf("Not Found File");
+		return;
+	}
+
+	fseek(file, 0, SEEK_END);
+	long length = ftell(file);
+	fseek(file, 0, SEEK_SET);
+
+	char* buff = new char[length + 1];
+	fread(buff, 1, (size_t)length, file);
+	buff[(size_t)length] = '\0';
+
+	wxString book = buff;	
+	m_bookStr = new std::wstring(book.ToStdWstring());
+	NextPage();
+}
+
+int BookFrame::GetTextWidth()
+{
+	wxSize size = this->GetSize();
+	int edge = Config::Get().GetEdge();
+	return size.x - 2 * edge;
 }
 
 int BookFrame::GetLines()
 {
 	int fontSize = Config::Get().GetFontSize();
 	int spacing = Config::Get().GetFontSpacing();
+	int edge = Config::Get().GetEdge();
 	wxSize size = this->GetSize();
-	return size.y / (fontSize + spacing);
+	return (size.y - edge * 2) / (fontSize + spacing);
 }
 
+bool BookFrame::CheckWidthOver(const std::wstring& str, int limitWidth)
+{
+	wxString tmpStr(str);
+	m_calcText->SetLabel(tmpStr);
+	int textWidth = m_calcText->GetSize().x;
+	m_calcText->SetLabel("");
+	return textWidth >= limitWidth;
+}
+
+std::vector<Line*> BookFrame::ConvertStringToPage(const wchar_t* wchars, int index, int lineLimit = 0)
+{
+	int contentIndex = index;
+
+	std::vector<Line*> lineStr;
+
+	std::wstring strBuffer;
+	int charCount = 0;
+
+	int contentLength = wcslen(wchars);
+	while (contentIndex < contentLength && (lineLimit == 0 || lineStr.size() < (unsigned int)lineLimit))
+	{
+		++charCount;
+		wchar_t ch = wchars[contentIndex++];
+		if (ch == '\n')  //--------------------
+		{
+			Line* l = new Line();
+			l->count = charCount;
+			l->content = new std::wstring(strBuffer);
+			lineStr.push_back(l);
+
+			strBuffer.clear();
+			charCount = 0;
+			continue;
+		}
+
+		strBuffer.push_back(ch);
+		if (CheckWidthOver(strBuffer, GetTextWidth()))
+		{
+			--contentIndex;
+			--charCount;
+			strBuffer.pop_back();
+
+			Line* l = new Line();
+			l->count = charCount;
+			l->content = new std::wstring(strBuffer);
+			lineStr.push_back(l);
+
+			strBuffer.clear();
+			charCount = 0;
+		}
+	}
+
+	if (strBuffer.length() > 0)
+	{
+		Line* l = new Line();
+		l->count = charCount;
+		l->content = new std::wstring(strBuffer);
+		lineStr.push_back(l);
+	}
+	return lineStr;
+}
+
+void BookFrame::NextPage()
+{
+	if (m_curContentIndex >= (int)m_bookStr->size())
+	{
+		printf("Book is over!");
+		return;
+	}
+
+	m_curContentIndex += m_curContentLength;
+	std::vector<Line*> nextContent = ConvertStringToPage(m_bookStr->c_str(), m_curContentIndex, GetLines());
+	if (!CheckHasContent(nextContent))
+	{
+		printf("Book is over!");
+		return;
+	}
+
+	int length = 0;
+	int j = 0;
+	for (int i = 0; i < (int)m_texts.size(); ++i)
+	{
+		if (j < (int)nextContent.size() && !nextContent[i]->content->empty())
+		{
+			length += nextContent[i]->count;
+			m_texts[i]->SetLabel(wxString(*nextContent[j]->content));
+			++j;
+		}
+		else
+		{
+			m_texts[i]->SetLabel("");
+		}
+	}
+	m_curContentLength = length;
+}
+
+void BookFrame::PrePage()
+{
+	if (m_curContentIndex <= 0)
+	{
+		printf("Book has no pre content!");
+		return;
+	}
+	int lines = GetLines();
+
+	std::vector<Line*> preContent;
+	int ratio = 1;
+	while (true)
+	{
+		int index = m_curContentIndex - m_curContentLength * (1 + ratio++);
+		index = index < 0 ? 0 : index;
+		std::wstring content = m_bookStr->substr(index, m_curContentIndex - index);
+		preContent = ConvertStringToPage(content.c_str(), 0);
+		if (preContent.size() <= 0)
+		{
+			printf("Book has no pre content!");
+			return;
+		}
+		else if (lines <= (int)preContent.size() || index == 0)
+		{
+			break;
+		}
+	}
+
+	if (!CheckHasContent(preContent))
+	{
+		printf("Book has no pre content!");
+		return;
+	}
+
+	int length = 0;
+	int j = preContent.size() - 1;
+	for (int i = m_texts.size() - 1; i >= 0; --i)
+	{
+		if (j >= 0 && !preContent[j]->content->empty())
+		{
+			length += preContent[j]->count;
+			m_texts[i]->SetLabel(*preContent[j]->content);
+			--j;
+		}
+		else
+		{
+			m_texts[i]->SetLabel("");
+		}
+	}
+	m_curContentLength = length;
+	m_curContentIndex -= m_curContentLength;
+}
+
+
+bool BookFrame::CheckHasContent(const std::vector<Line*> strs)
+{
+	for (int i = 0; i < (int)strs.size(); ++i)
+	{
+		if (!strs[i]->content->empty())
+		{
+			return true;
+		}
+	}
+	return false;
+}
 

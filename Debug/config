@@ -1,6 +1,6 @@
 width=600
 height=500
-//ARGB
-backColor=FFFFFF97
+//ABGR  FF027260
+backColor=FF607202
 frontColor=FF9AFF9A
 edge=20

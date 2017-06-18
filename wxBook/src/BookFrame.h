@@ -5,20 +5,38 @@
 #include <wx/stattext.h>
 #include <vector>
 
+typedef struct _Line
+{
+	std::wstring* content;
+	int count;
+}Line;
+
 class BookFrame : public wxFrame
 {
 public:
 	BookFrame(wxFrame* parent);
 	void OnMouseMove(wxMouseEvent& evt);
 	void OnLeftMouseDown(wxMouseEvent& evt);
+	void OnRightMouseDown(wxMouseEvent & evt);
 private:
 	void InitBookStr();
 	void InitFrame();
+	int GetTextWidth();
 	int GetLines();
+	bool CheckWidthOver(const std::wstring & str, int limitWidth);
+	std::vector<Line*> ConvertStringToPage(const wchar_t * wchars, int index, int lineLimit);
+	void NextPage();
+	void PrePage();
+	bool CheckHasContent(const std::vector<Line*> strs);
 private:
 	wxPoint m_delta;	
 	std::vector<wxStaticText*> m_texts;
-	wxString* m_bookStr;
+	std::wstring* m_bookStr;
+	wxStaticText* m_calcText;
+
+	int m_curContentIndex = 0;
+	int m_curContentLength = 0;
+
 	wxDECLARE_EVENT_TABLE();
 };
 

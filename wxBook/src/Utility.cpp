@@ -49,27 +49,7 @@ std::string Utility::GetExtenName(std::string p)
 	return p.substr(p.find_last_of("."), p.length());
 }
 
-void Utility::GetFiles(std::vector<std::string> &files, std::string &dir, const char* suffix)
-{
-    WIN32_FIND_DATA file;
-    HANDLE lf;
-    if ((lf = ::FindFirstFile(dir.c_str(), &file)) == INVALID_HANDLE_VALUE) {
-        std::cout << dir << " not found!!!" << std::endl;
-    } else {
-        while(::FindNextFile(lf, &file) == 0) {
-            if (strcmp((char*)file.cFileName, ".") == 0 || strcmp((char*)file.cFileName, "..") == 0)
-                continue;
-			std::string exten = Utility::GetExtenName((char*)file.cFileName);
-			if (suffix != NULL && strcmp(exten.c_str(), suffix) != 0)
-				continue;
-
-            files.push_back((char*)file.cFileName);
-        }
-    }
-    FindClose(lf);
-}
-
-void Utility::FindAllFile(std::vector<std::string>& strFiles, std::string lpPath, const char* suffix)
+void Utility::FindAllFile(std::vector<std::string>& strFiles, std::string lpPath, bool recurs, const char* suffix)
 {
 	WIN32_FIND_DATA FindFileData;
 	std::string szFind = lpPath + "\\*.*";
@@ -87,7 +67,9 @@ void Utility::FindAllFile(std::vector<std::string>& strFiles, std::string lpPath
 
 		if (FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
-			FindAllFile(strFiles, szFile);
+			if (!recurs)
+				continue;
+			FindAllFile(strFiles, szFile, recurs, suffix);
 		}
 		else
 		{
@@ -99,4 +81,21 @@ void Utility::FindAllFile(std::vector<std::string>& strFiles, std::string lpPath
 		}
 	}
 	FindClose(hFind);
+}
+
+long Utility::GetFileSize(FILE* fp)
+{
+	long cur = ftell(fp);	fseek(fp, 0, SEEK_END);	long length = ftell(fp);	fseek(fp, cur, SEEK_SET);
+	return length;
+}
+
+std::string* Utility::GetFileContent(FILE* fp)
+{
+	long length = GetFileSize(fp);
+
+	char* buff = new char[length + 1];	fread(buff, 1, (size_t)length, fp);	buff[(size_t)length] = '\0';
+
+	std::string* content = new std::string(buff);
+	delete[] buff;
+	return content;
 }
